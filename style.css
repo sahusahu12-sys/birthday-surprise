@@ -1,0 +1,389 @@
+:root {
+    --primary-glow: #ffb830;
+    --flame-core: #fff;
+    --flame-outer: #ff9a00;
+    --bg-dark: #0a0a0a;
+    --bg-light: #1a1a2e;
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(circle at center, var(--bg-light), var(--bg-dark));
+    overflow: hidden;
+    font-family: 'Montserrat', sans-serif;
+    color: white;
+    user-select: none;
+}
+
+#bgCanvas,
+#fxCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#bgCanvas {
+    z-index: 0;
+}
+
+#fxCanvas {
+    z-index: 100;
+    /* Above everything for flame and fireworks */
+}
+
+.scene {
+    position: relative;
+    z-index: 10;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+}
+
+.center-stage {
+    text-align: center;
+    transition: opacity 1s ease-in-out, transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hidden {
+    display: none !important;
+    /* Simple toggle for phases */
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Typography */
+.title {
+    font-family: 'Cinzel', serif;
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(to right, #fff, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    opacity: 0;
+    animation: fadeInDown 1.5s ease-out forwards;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeInUp 1.5s ease-out 0.5s forwards;
+}
+
+/* 3D Candle Styling - STUNNING VERSION */
+.candle-container {
+    position: relative;
+    width: 80px;
+    height: 220px;
+    margin: 0 auto 50px;
+    transform-style: preserve-3d;
+    opacity: 0;
+    animation: fadeInScale 1.5s ease-out 1s forwards;
+    filter: drop-shadow(0 0 30px rgba(255, 160, 0, 0.4));
+}
+
+.candle {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+/* Main Body - Elegant Golden Candle */
+.wax {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right,
+            #e6cfa3 0%,
+            #fff8e7 20%,
+            #fff 50%,
+            #ffeebb 80%,
+            #dab576 100%);
+    border-radius: 12px;
+    box-shadow:
+        inset 0 -20px 30px rgba(0, 0, 0, 0.1),
+        inset 0 10px 20px rgba(255, 255, 255, 0.8),
+        0 0 15px rgba(255, 215, 0, 0.2);
+    bottom: 0;
+    left: 0;
+    overflow: visible;
+}
+
+/* Melted wax top */
+.wax::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -5px;
+    right: -5px;
+    height: 20px;
+    background: radial-gradient(ellipse at center, #fff 0%, #f0e6d3 100%);
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Dripping Wax Effect */
+.wax::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: -3px;
+    width: 12px;
+    height: 40px;
+    background: linear-gradient(to bottom, #fff, #ffeebb);
+    border-radius: 0 0 10px 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Extra Drip on the other side */
+.candle::after {
+    content: '';
+    position: absolute;
+    top: 25px;
+    right: -2px;
+    width: 10px;
+    height: 30px;
+    background: linear-gradient(to bottom, #fff, #ffeebb);
+    border-radius: 0 0 8px 8px;
+    box-shadow: -1px 2px 5px rgba(0, 0, 0, 0.05);
+    z-index: 2;
+}
+
+/* The Wick */
+.wick {
+    position: absolute;
+    width: 4px;
+    height: 18px;
+    background: linear-gradient(to top, #2c2c2c, #1a1a1a);
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px;
+    z-index: 5;
+}
+
+/* Burnt tip of wick */
+.wick::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background: #111;
+    border-radius: 50%;
+}
+
+/* Button Styling */
+.glow-button {
+    background: rgba(20, 20, 30, 0.8);
+    border: 1px solid rgba(255, 215, 0, 0.8);
+    color: #ffd700;
+    padding: 16px 45px;
+    font-size: 1.2rem;
+    font-family: 'Cinzel', serif;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    box-shadow:
+        0 0 20px rgba(255, 215, 0, 0.2),
+        inset 0 0 10px rgba(255, 215, 0, 0.1);
+    margin-top: 30px;
+    opacity: 0;
+    animation: fadeIn 1s ease-out 2s forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.glow-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.glow-button:hover::before {
+    left: 100%;
+}
+
+.glow-button:hover {
+    background: rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+    transform: scale(1.05) translateY(-2px);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+/* Reveal State */
+.photo-frame {
+    width: 300px;
+    height: 400px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    transform: rotateX(10deg);
+    animation: float 6s ease-in-out infinite;
+    margin-bottom: 30px;
+}
+
+.photo-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 15px;
+    position: relative;
+}
+
+.photo-wrapper img,
+.photo-wrapper video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.photo-frame:hover .photo-wrapper img,
+.photo-frame:hover .photo-wrapper video {
+    transform: scale(1.1);
+}
+
+.happy-birthday {
+    font-family: 'Cinzel', serif;
+    font-size: 3.5rem;
+    color: #fff;
+    margin: 0;
+    text-shadow: 0 0 20px rgba(255, 100, 200, 0.8);
+    animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.wish-text {
+    font-size: 1.2rem;
+    color: #ddd;
+    margin-top: 10px;
+}
+
+.replay-btn {
+    margin-top: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 10px 20px;
+    color: #888;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.replay-btn:hover {
+    color: #fff;
+}
+
+.mic-status {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffd700;
+    font-size: 0.9rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+}
+
+/* Keyframes */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0) rotateX(5deg);
+    }
+
+    50% {
+        transform: translateY(-20px) rotateX(10deg);
+    }
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    80% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

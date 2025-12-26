@@ -1,119 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎂 Birthday Surprise</title>
-
-<style>
-body {
-  margin: 0;
-  height: 100vh;
-  background: radial-gradient(circle at top, #1a1a1a, #000);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: system-ui;
-  color: white;
-  text-align: center;
-  overflow: hidden;
-}
-
-#container {
-  max-width: 320px;
-}
-
-#candle {
-  font-size: 80px;
-  animation: flicker 0.15s infinite;
-}
-
-@keyframes flicker {
-  0% { transform: rotate(-1deg); }
-  50% { transform: rotate(1deg); }
-  100% { transform: rotate(-1deg); }
-}
-
-#msg {
-  margin-top: 10px;
-  font-size: 14px;
-  opacity: 0.8;
-}
-
-#photo {
-  display: none;
-  margin-top: 20px;
-}
-
-#photo img {
-  width: 100%;
-  border-radius: 16px;
-  box-shadow: 0 0 30px rgba(255,200,200,0.4);
-}
-
-#final {
-  display: none;
-  margin-top: 15px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Birthday Surprise</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;600&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
 
-<div id="container">
-  <h2>🎂 Birthday Candle</h2>
-  <div id="candle">🕯️</div>
-  <div id="msg">Blow into your mic to make a wish ✨</div>
+    <!-- Background Stars Canvas -->
+    <canvas id="bgCanvas"></canvas>
 
-  <div id="photo">
-    <img src="PHOTO_URL_HERE">
-  </div>
+    <div class="scene">
+        <div class="content-wrapper">
 
-  <div id="final">
-    <h2>🎉 Happy Birthday 🎉</h2>
-    <p>Your wish is unlocked 💫</p>
-  </div>
-</div>
+            <div id="initial-state" class="center-stage">
+                <h1 class="title">Make a Wish</h1>
+                <p class="subtitle">Breath life into the flame, then blow it out.</p>
 
-<audio id="music" autoplay loop>
-  <source src="MUSIC_URL_HERE" type="audio/mpeg">
-</audio>
+                <div class="candle-container">
+                    <div class="candle">
+                        <div class="wax"></div>
+                        <div class="wick"></div>
+                        <!-- Flame is rendered on the overlay canvas, positioned here via JS or absolute positioning relative to container -->
+                    </div>
+                </div>
 
-<script>
-navigator.mediaDevices.getUserMedia({ audio: true })
-.then(stream => {
-  const audioCtx = new AudioContext();
-  const mic = audioCtx.createMediaStreamSource(stream);
-  const analyser = audioCtx.createAnalyser();
-  mic.connect(analyser);
+                <div class="mic-status hidden" id="micStatus">
+                    <div class="mic-icon">🎤</div>
+                    <span>Listening for your wish...</span>
+                </div>
 
-  const data = new Uint8Array(analyser.frequencyBinCount);
+                <button id="startBtn" class="glow-button">Ignite the Magic</button>
+            </div>
 
-  function detectBlow() {
-    analyser.getByteFrequencyData(data);
-    let volume = data.reduce((a, b) => a + b) / data.length;
+            <div id="final-state" class="center-stage hidden">
+                <div class="photo-frame">
+                    <div class="photo-wrapper">
+                        <!-- 
+                            REPLACE THIS SRC WITH YOUR OWN VIDEO! 
+                            Example: src="my_birthday_video.mp4" 
+                        -->
+                        <video id="birthdayVideo" controls loop playsinline>
+                            <source src="Birthday_Video_Creation_Request.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+                <h2 class="happy-birthday">Happy Birthday!</h2>
+                <p class="wish-text" id="wishText">Your wish has been released to the universe.</p>
 
-    if (volume > 40) {
-      blowOut();
-    } else {
-      requestAnimationFrame(detectBlow);
-    }
-  }
+                <button onclick="location.reload()" class="replay-btn">Replay Memory</button>
+            </div>
 
-  detectBlow();
-});
+        </div>
+    </div>
 
-function blowOut() {
-  document.getElementById("candle").textContent = "💨";
-  document.getElementById("msg").textContent = "Wish accepted ✨";
+    <!-- Foreground Effects (Flame, Smoke, Fireworks) -->
+    <canvas id="fxCanvas"></canvas>
 
-  setTimeout(() => {
-    document.getElementById("candle").style.display = "none";
-    document.getElementById("photo").style.display = "block";
-    document.getElementById("final").style.display = "block";
-  }, 1200);
-}
-</script>
+    <!-- Audio hidden -->
+    <audio id="bgMusic" loop>
+        <!-- A magical, ambient track -->
+        <source
+            src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_4f0c6e1079.mp3?filename=magical-moments-124068.mp3"
+            type="audio/mpeg">
+    </audio>
 
+    <script src="script.js"></script>
 </body>
+
 </html>
