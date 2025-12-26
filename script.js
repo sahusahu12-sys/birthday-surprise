@@ -21,7 +21,7 @@ const STATE = {
     isListening: false,
     isExtinguished: false,
     blowIntensity: 0,
-    flameIntensity: 1.0, // Start visible immediately
+    flameIntensity: 0, // Starts at 0, set to 1.0 after candle appears
 };
 
 // --- Elements ---
@@ -290,44 +290,42 @@ function createPars(x, y, hue) {
 
 // --- Loop ---
 function loop() {
-    // Clear with fade for trails
-    fxCtx.globalCompositeOperation = 'destination-out';
-    fxCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    fxCtx.fillRect(0, 0, fxCanvas.width, fxCanvas.height);
+    try {
+        // Clear with fade for trails
+        fxCtx.globalCompositeOperation = 'destination-out';
+        fxCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        fxCtx.fillRect(0, 0, fxCanvas.width, fxCanvas.height);
 
-    // Use source-over for flame (so it's visible)
-    fxCtx.globalCompositeOperation = 'source-over';
+        // Use source-over for flame (so it's visible)
+        fxCtx.globalCompositeOperation = 'source-over';
 
-    // 1. Flame Logic
-    if (!STATE.isExtinguished) {
-        if (STATE.flameIntensity > 0.1) {
-            for (let i = 0; i < 3; i++) flameParticles.push(new FlameParticle());
+        // 1. Flame Logic
+        if (!STATE.isExtinguished) {
+            if (STATE.flameIntensity > 0.1) {
+                for (let i = 0; i < 3; i++) flameParticles.push(new FlameParticle());
+            }
+
+            // Draw Flame
+            for (let i = flameParticles.length - 1; i >= 0; i--) {
+                flameParticles[i].update();
+                flameParticles[i].draw(fxCtx);
+                if (flameParticles[i].life <= 0) flameParticles.splice(i, 1);
+            }
+        } else {
+            flameParticles.length = 0;
         }
 
-        // Draw Flame
-        for (let i = flameParticles.length - 1; i >= 0; i--) {
-            flameParticles[i].update();
-            flameParticles[i].draw(fxCtx);
-            if (flameParticles[i].life <= 0) flameParticles.splice(i, 1);
+        // Draw Smoke Puffs
+        for (let i = smokeParticles.length - 1; i >= 0; i--) {
+            smokeParticles[i].update();
+            smokeParticles[i].draw(fxCtx);
+            if (smokeParticles[i].life <= 0) smokeParticles.splice(i, 1);
         }
-    } else {
-        flameParticles.length = 0;
-    }
 
-    // Draw Smoke Puffs
-    for (let i = smokeParticles.length - 1; i >= 0; i--) {
-        smokeParticles[i].update();
-        smokeParticles[i].draw(fxCtx);
-        if (smokeParticles[i].life <= 0) smokeParticles.splice(i, 1);
-    }
+        // Switch to lighter for fireworks (glowing effect)
+        fxCtx.globalCompositeOperation = 'lighter';
 
-    // Switch to lighter for fireworks (glowing effect)
-    fxCtx.globalCompositeOperation = 'lighter';
-
-    // 2. Fireworks Logic
-    // Always active as per request
-    if (true) {
-        // Random Launch
+        // 2. Fireworks Logic - Always active
         if (Math.random() < 0.05) {
             fireworks.push(new Firework(random(0, fxCanvas.width), random(0, fxCanvas.height / 2)));
         }
@@ -343,8 +341,11 @@ function loop() {
             particles[i].update(i);
             particles[i].draw(fxCtx);
         }
+    } catch (e) {
+        console.error("Loop error:", e);
     }
 
+    // ALWAYS continue the loop, even if there was an error
     requestAnimationFrame(loop);
 }
 
@@ -430,7 +431,12 @@ initStars();
 drawStars();
 loop();
 
-// Start microphone immediately on page load
+// Delay flame start to match candle CSS animation (candle fades in over 1.5s with 1s delay)
+setTimeout(() => {
+    STATE.flameIntensity = 1.0;
+}, 2000);
+
+// Request microphone permission at page load
 startMic();
 
 // Mobile Helper: Prime media on first user interaction
@@ -445,6 +451,7 @@ function unlockMedia() {
     }
 }
 
+// IGNITE BUTTON - Unlock media only (mic already started at page load)
 const triggerStart = (e) => {
     if (e.type === 'touchstart') e.preventDefault();
 
@@ -457,7 +464,7 @@ const triggerStart = (e) => {
 startBtn.addEventListener('click', triggerStart);
 startBtn.addEventListener('touchstart', triggerStart, { passive: false });
 
-// Better touch support for fallback
+// Candle tap fallback (in case mic doesn't work)
 const candleEl = document.querySelector('.candle');
 candleEl.addEventListener('click', extinguish);
 candleEl.addEventListener('touchstart', (e) => {
