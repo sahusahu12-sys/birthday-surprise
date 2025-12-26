@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎂 Birthday Surprise</title>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: radial-gradient(circle at top, #1a1a1a, #000);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: system-ui;
+  color: white;
+  text-align: center;
+  overflow: hidden;
+}
+
+#container {
+  max-width: 320px;
+}
+
+#candle {
+  font-size: 80px;
+  animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+  0% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+  100% { transform: rotate(-1deg); }
+}
+
+#msg {
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+#photo {
+  display: none;
+  margin-top: 20px;
+}
+
+#photo img {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 0 30px rgba(255,200,200,0.4);
+}
+
+#final {
+  display: none;
+  margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="container">
+  <h2>🎂 Birthday Candle</h2>
+  <div id="candle">🕯️</div>
+  <div id="msg">Blow into your mic to make a wish ✨</div>
+
+  <div id="photo">
+    <img src="PHOTO_URL_HERE">
+  </div>
+
+  <div id="final">
+    <h2>🎉 Happy Birthday 🎉</h2>
+    <p>Your wish is unlocked 💫</p>
+  </div>
+</div>
+
+<audio id="music" autoplay loop>
+  <source src="MUSIC_URL_HERE" type="audio/mpeg">
+</audio>
+
+<script>
+navigator.mediaDevices.getUserMedia({ audio: true })
+.then(stream => {
+  const audioCtx = new AudioContext();
+  const mic = audioCtx.createMediaStreamSource(stream);
+  const analyser = audioCtx.createAnalyser();
+  mic.connect(analyser);
+
+  const data = new Uint8Array(analyser.frequencyBinCount);
+
+  function detectBlow() {
+    analyser.getByteFrequencyData(data);
+    let volume = data.reduce((a, b) => a + b) / data.length;
+
+    if (volume > 40) {
+      blowOut();
+    } else {
+      requestAnimationFrame(detectBlow);
+    }
+  }
+
+  detectBlow();
+});
+
+function blowOut() {
+  document.getElementById("candle").textContent = "💨";
+  document.getElementById("msg").textContent = "Wish accepted ✨";
+
+  setTimeout(() => {
+    document.getElementById("candle").style.display = "none";
+    document.getElementById("photo").style.display = "block";
+    document.getElementById("final").style.display = "block";
+  }, 1200);
+}
+</script>
+
+</body>
+</html>
